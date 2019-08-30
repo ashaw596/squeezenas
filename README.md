@@ -10,15 +10,15 @@ Python >= 3.7.0, pytorch >= 1.0.1, torchvision >= 0.2.2, tabulate == 0.8.3, nump
 ## Cityscapes Dataset
 The dataset can be downloaded from their [website](https://www.cityscapes-dataset.com/downloads/).
 
-Extract the [annotations](https://www.cityscapes-dataset.com/file-handling/?packageID=1) and copy the ```gtFine``` directory to ```data/gtFine```.
+Extract the [annotations](https://www.cityscapes-dataset.com/file-handling/?packageID=1) and copy the ```gtFine``` directory to ```data/gtFine```.  
 Extract the [left imaget set](https://www.cityscapes-dataset.com/file-handling/?packageID=3) and copy the ```leftImg8bit``` directory to ```data/leftImg8bit```.
 
 ## Instructions
-Install the Prerequesites. The evaluation will be faster on GPU, but it can also be evaluated without using the ```--use_cpu``` flag. Install the corresponding version of [pytorch](https://pytorch.org)
+Install the prerequesites. The evaluation will be faster on GPU, but it can also be evaluated without using the ```--use_cpu``` flag. Install the corresponding version of [pytorch](https://pytorch.org)
 
 Clone the repository.
 
-Initialize the cityscapes evaluation submodules.
+Initialize the cityscapesScripts submodule.
 ```
 git submodule init
 git submodule update
@@ -44,18 +44,15 @@ To evaluate the squeezenas_lat_large network:
 Expected results:  
 ```classIOU: 0.7350594481447746, categoryIOU: 0.8657799839081778, GigaMACs: 19.574636544```
 
-\\
 To evaluate the squeezenas_lat_xlarge network:  
 ```python3 eval.py --net squeezenas_lat_xlarge```  
 Expected Results:  
 ```classIOU: 0.7505558962490358, categoryIOU: 0.8727507286930606, GigaMACs: 32.729202687999994```
 
 To evaluate the squeezenas_mac_small network:  
-
 ```python3 eval.py --net squeezenas_mac_small```  
 Expected results:  
 ```classIOU: 0.6677272073464366, categoryIOU: 0.8393623681041512, GigaMACs: 3.007512576000001```
-
 
 To evaluate the squeezenas_mac_large network:  
 ```python3 eval.py --net squeezenas_mac_large```  
@@ -67,11 +64,12 @@ To evaluate the squeezenas_mac_xlarge network:
 Expected Results:  
 ```classIOU: 0.7462089926605817, categoryIOU: 0.8699823279398887, GigaMACs: 21.838299135999996```
 
+## eval.py command line options
 
 ```eval.py``` uses a command line interface. 
 For help, please run: ```python3 eval.py --help```
 
-The following flags are available:
+The following flags are available:  
 -v, --verbose: if this option is supplied, a full layer by layer GMAC summary of the model will be printed. If this option is not supplied, only the total GMACs will be printed.
 
 -m, --only_macs: if this option is supplied, no inference is run, only MAC count is printed.
