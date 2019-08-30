@@ -1,2 +1,5 @@
+pytorch
 tabulate
 numpy
+dataclasses; python_version < '3.7'
+torchvision
