@@ -8,8 +8,8 @@ code for the [SqueezeNAS paper](https://arxiv.org/abs/1908.01748).
 ```
 Python >= 3.7.0
 PyTorch >= 1.0.1
-torchvision >= 0.2.2,
-tabulate == 0.8.3,
+torchvision >= 0.2.2
+tabulate == 0.8.3
 numpy >= 1.15.4
 Pillow
 ```
@@ -41,6 +41,14 @@ Expected results:
 |---|---|---|---|---|---|
 | squeezenas_lat_small | 0.6800 | 0.8413 | 4.46 |
 | squeezenas_lat_large | 0.7350 | 0.8657 | 10.86 |
+
+
+| Command | Description |
+| --- | --- |
+| `git status` | List all *new or modified* files |
+| `git diff` | Show file differences that **haven't been** staged |
+
+
 <!-- |   |   |   |   |   |   | -->
 
 
