@@ -137,6 +137,5 @@ if __name__ == '__main__':
 
 
     args, unknown = parser.parse_known_args()
-    # args = vars(args)
     print(args)
     main(verbose=args.verbose, only_macs=args.only_macs, net_name=args.net, use_cpu=args.use_cpu)
