@@ -10,12 +10,8 @@ import torch
 from PIL import Image
 from torchvision.transforms import Compose, ToTensor, Normalize
 
-# from nets import nets as mynets
-# from arch import get_hyperparams, Net
 from countmacs import MAC_Counter
 from nets import SQUEEZENAS_NETWORKS
-
-# from operations import map_back_to_35
 
 DATA_DIR = Path('./data')
 os.environ['CITYSCAPES_DATASET'] = str(DATA_DIR.absolute())
@@ -78,8 +74,6 @@ def main(verbose: bool, only_macs: bool, save_output: bool = True, net_name: str
     if only_macs:
         return
 
-    # model = torch.nn.DataParallel(model.cuda())
-    # model.load_state_dict(weights, strict=True)
     model.eval()
 
     print("Evaluating Model on the Validation Dataset")
@@ -137,6 +131,5 @@ if __name__ == '__main__':
 
 
     args, unknown = parser.parse_known_args()
-    # args = vars(args)
     print(args)
     main(verbose=args.verbose, only_macs=args.only_macs, net_name=args.net, use_cpu=args.use_cpu)

@@ -63,21 +63,26 @@ class InvertedResidualSkipOperation(Operation):
 
 
 class Ops(EnumNamePickled):
-    mobile_net_k3_e1_g1 = InvertedResidualOperation(group=1, kernel_size=3, padding=1, expand_ratio=1)
-    mobile_net_k3_e1_g2 = InvertedResidualOperation(group=2, kernel_size=3, padding=1, expand_ratio=1)
-    mobile_net_k3_e3_g1 = InvertedResidualOperation(group=1, kernel_size=3, padding=1, expand_ratio=3)
-    mobile_net_k3_e6_g1 = InvertedResidualOperation(group=1, kernel_size=3, padding=1, expand_ratio=6)
-    mobile_net_k5_e1_g1 = InvertedResidualOperation(group=1, kernel_size=5, padding=2, expand_ratio=1)
-    mobile_net_k5_e1_g2 = InvertedResidualOperation(group=2, kernel_size=5, padding=2, expand_ratio=1)
-    mobile_net_k5_e3_g1 = InvertedResidualOperation(group=1, kernel_size=5, padding=2, expand_ratio=3)
-    mobile_net_k5_e6_g1 = InvertedResidualOperation(group=1, kernel_size=5, padding=2, expand_ratio=6)
+    inverse_residual_k3_e1_g1 = InvertedResidualOperation(group=1, kernel_size=3, padding=1, expand_ratio=1)
+    inverse_residual_k3_e1_g2 = InvertedResidualOperation(group=2, kernel_size=3, padding=1, expand_ratio=1)
+    inverse_residual_k3_e3_g1 = InvertedResidualOperation(group=1, kernel_size=3, padding=1, expand_ratio=3)
+    inverse_residual_k3_e6_g1 = InvertedResidualOperation(group=1, kernel_size=3, padding=1, expand_ratio=6)
 
-    mobile_net_k3_e1_g1_d2 = InvertedResidualOperation(group=1, kernel_size=3, padding=2, expand_ratio=1, dilation=2)
-    mobile_net_k3_e1_g2_d2 = InvertedResidualOperation(group=2, kernel_size=3, padding=2, expand_ratio=1, dilation=2)
-    mobile_net_k3_e3_g1_d2 = InvertedResidualOperation(group=1, kernel_size=3, padding=2, expand_ratio=3, dilation=2)
-    mobile_net_k3_e6_g1_d2 = InvertedResidualOperation(group=1, kernel_size=3, padding=2, expand_ratio=6, dilation=2)
+    inverse_residual_k5_e1_g1 = InvertedResidualOperation(group=1, kernel_size=5, padding=2, expand_ratio=1)
+    inverse_residual_k5_e1_g2 = InvertedResidualOperation(group=2, kernel_size=5, padding=2, expand_ratio=1)
+    inverse_residual_k5_e3_g1 = InvertedResidualOperation(group=1, kernel_size=5, padding=2, expand_ratio=3)
+    inverse_residual_k5_e6_g1 = InvertedResidualOperation(group=1, kernel_size=5, padding=2, expand_ratio=6)
 
-    mobile_net_residual_skipish = InvertedResidualSkipOperation()
+    inverse_residual_k3_e1_g1_d2 = InvertedResidualOperation(group=1, kernel_size=3, padding=2, expand_ratio=1,
+                                                             dilation=2)
+    inverse_residual_k3_e1_g2_d2 = InvertedResidualOperation(group=2, kernel_size=3, padding=2, expand_ratio=1,
+                                                             dilation=2)
+    inverse_residual_k3_e3_g1_d2 = InvertedResidualOperation(group=1, kernel_size=3, padding=2, expand_ratio=3,
+                                                             dilation=2)
+    inverse_residual_k3_e6_g1_d2 = InvertedResidualOperation(group=1, kernel_size=3, padding=2, expand_ratio=6,
+                                                             dilation=2)
+
+    residual_skipish = InvertedResidualSkipOperation()
 
     @DynamicClassAttribute
     def value(self) -> Operation:
@@ -191,7 +196,6 @@ class FactorizedReduce(nn.Module):
             nn.Conv2d(c_in, c_out // 2, 1, stride=2, padding=0, bias=False),
             nn.BatchNorm2d(c_out // 2, affine=affine)
         )
-        # self.bn = nn.BatchNorm2d(c_out, affine=affine)
 
     def forward(self, x):
         x = self.relu(x)

@@ -1,10 +1,35 @@
 from dataclasses import dataclass
 from typing import Sequence, Optional
 
+import torch
 from torch import nn
 
-from arch.common import Flatten
 from arch.operations import Ops
+
+
+@dataclass(frozen=True)
+class InvertResidualNetBlockMetaHyperparameters:
+    num_channels: int
+    num_repeat: int
+    stride: int
+
+
+@dataclass(frozen=True)
+class InverseResidualMetaNetHyperparameters:
+    init_channels: int
+    blocks: Sequence[InvertResidualNetBlockMetaHyperparameters]
+    last_channels: Optional[int]
+    num_classes: Optional[int]
+    last_pooled_channels: Optional[int] = None
+
+    def __post_init__(self):
+        if self.last_channels is None:
+            assert self.num_classes is None
+
+
+class Flatten(nn.Module):
+    def forward(self, input: torch.Tensor):
+        return input.view(input.size(0), -1)
 
 
 def conv3x3_bn(c_in, c_out, stride):
@@ -21,26 +46,6 @@ def conv_1x1_bn(c_in, c_out):
         nn.BatchNorm2d(c_out),
         nn.ReLU(inplace=True)
     )
-
-
-@dataclass(frozen=True)
-class DSMobileNetBlockMetaHyperparameters:
-    num_channels: int
-    num_repeat: int
-    stride: int
-
-
-@dataclass(frozen=True)
-class DSMobileNetMetaHyperparameters:
-    init_channels: int
-    blocks: Sequence[DSMobileNetBlockMetaHyperparameters]
-    last_channels: Optional[int]
-    num_classes: Optional[int]
-    last_pooled_channels: Optional[int] = None
-
-    def __post_init__(self):
-        if self.last_channels is None:
-            assert self.num_classes is None
 
 
 class InvertedResidual(nn.Module):
@@ -60,8 +65,8 @@ class InvertedResidual(nn.Module):
             return output
 
 
-class DSMobileNet(nn.Module):
-    def __init__(self, hyperparams: DSMobileNetMetaHyperparameters, genotype: Sequence[Ops], dropout=0):
+class SqueezeNASNet(nn.Module):
+    def __init__(self, hyperparams: InverseResidualMetaNetHyperparameters, genotype: Sequence[Ops], dropout=0):
         super().__init__()
         self.hyperparams = hyperparams
         self.conv1 = conv3x3_bn(c_in=3, c_out=hyperparams.init_channels, stride=2)
@@ -109,14 +114,8 @@ class DSMobileNet(nn.Module):
         cur_feat = self.conv1(cur_feat)
         residuals_outputs = []
         for i, residual in enumerate(self.residuals):
-            try:
-                cur_feat = residual(cur_feat)
-                residuals_outputs.append(cur_feat)
-            except Exception as e:
-                print('i', i)
-                print(e)
-                print(cur_feat)
-                exit(-1)
+            cur_feat = residual(cur_feat)
+            residuals_outputs.append(cur_feat)
 
         if self.hyperparams.last_channels is None:
             return {'output': cur_feat, 'residuals_outputs': residuals_outputs}
