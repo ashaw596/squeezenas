@@ -1,7 +1,6 @@
 # SqueezeNAS: Fast neural architecture search for faster semantic segmentation
 
-This repository contains the trained models and architectures as well as evaluation
-code for the [SqueezeNAS paper](https://arxiv.org/abs/1908.01748).
+This repository contains the trained deep neural network architectures and weights as well as evaluation code for the [SqueezeNAS paper](https://arxiv.org/abs/1908.01748).
 
 If you find this useful, or if you use it in your commercial work, please cite:
 
