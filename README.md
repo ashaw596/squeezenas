@@ -42,16 +42,30 @@ and copy the `leftImg8bit` directory to `data/leftImg8bit`.
 
 ## Evaluation
 
-Expected results:
+Use the ```eval.py``` script to evaluate the models. Results are saved into the ```results``` folder.
+
+To evaluate the squeezenas_lat_small network, run:  
+```python3 eval.py --net squeezenas_lat_small```
+
+By default the networks are evaluated using the GPU. Use the ```--use_cpu``` option to evaluate only on CPU.  
+```python3 eval.py --net squeezenas_lat_small --use_cpu```
+
+The other networks can be evaluated by running the specifying the other networks for the ```--net``` option.
+
+```bash evaluate_all_models.sh``` will evaluate all the models.
+
+There is some minor variation to results reported in the paper which is the maximum validation accuracy chosen from the last 20 epochs of training due to the models which were saved.
+
+## Expected results:
 
 | Name | classIOU  | categoryIOU | GigaMACs |
 | --- | --- | --- | --- |
-| squeezenas_lat_small  | 0.6800 | 0.8413 | 4.46  |
-| squeezenas_lat_large  | 0.7350 | 0.8657 | 10.86 |
-| squeezenas_lat_xlarge | 0.7505 | 0.8727 | 32.72 |
-| squeezenas_mac_small  | 0.6677 | 0.8393 | 3.00  |
-| squeezenas_lat_large  | 0.7240 | 0.8617 | 9.38  |
-| squeezenas_mac_xlarge | 0.7462 | 0.8699 | 21.83 |
+| squeezenas_lat_small  | 0.6801 | 0.8413 | 4.47  |
+| squeezenas_lat_large  | 0.7351 | 0.8658 | 19.57 |
+| squeezenas_lat_xlarge | 0.7506 | 0.8728 | 32.73 |
+| squeezenas_mac_small  | 0.6677 | 0.8394 | 3.01  |
+| squeezenas_mac_large  | 0.7240 | 0.8618 | 9.39  |
+| squeezenas_mac_xlarge | 0.7462 | 0.8700 | 21.84 |
 
 ## eval.py command line options
 

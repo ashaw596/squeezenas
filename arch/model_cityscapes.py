@@ -83,18 +83,18 @@ class ASPP_Lite(nn.Module):
         self._1x1_BR = nn.Conv2d(os8_channels, num_classes, kernel_size=1)
         self.avgpool = torch.nn.AvgPool2d(kernel_size=49, stride=[16, 20], count_include_pad=False)
 
-    def forward(self, OS16, OS8):
-        assert OS16.shape[-1] * 2 == OS8.shape[-1], (OS8.shape, OS16.shape)
-        t1 = self._1x1_TL(OS16)
+    def forward(self, os16, os8):
+        assert os16.shape[-1] * 2 == os8.shape[-1], (os8.shape, os16.shape)
+        t1 = self._1x1_TL(os16)
         B, C, H, W = t1.shape
-        t2 = self.avgpool(OS16)
+        t2 = self.avgpool(os16)
         t2 = self._1x1_BL(t2)
         t2 = torch.sigmoid(t2)
         t2 = F.interpolate(t2, size=(H, W), mode='bilinear', align_corners=False)
         t3 = t1 * t2
         t3 = F.interpolate(t3, scale_factor=2, mode='bilinear', align_corners=False)
         t3 = self._1x1_TR(t3)
-        t4 = self._1x1_BR(OS8)
+        t4 = self._1x1_BR(os8)
         return t3 + t4
 
 
@@ -113,12 +113,15 @@ class SqueezeNASNetCityscapes(nn.Module):
 
         mid_ch = hyperparams.mid_channels
 
+        low_level_channels = None
         count = 0
         for block in hyperparams.blocks:
             count += block.num_repeat
             if count > self.hyperparams.skip_output_block_index:
                 low_level_channels = block.num_channels
                 break
+
+        assert low_level_channels is not None
 
         if hyperparams.last_channels:
             last_channels = hyperparams.last_channels
