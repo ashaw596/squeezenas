@@ -1,4 +1,4 @@
-# SqueezeNAS: Fast neural architecture search for faster semantic segmentation
+# SqueezeNAS: Fast Neural Architecture Search for Faster Semantic Segmentation
 
 This repository contains the trained deep neural network architectures and weights as well as evaluation code for the [SqueezeNAS paper](https://arxiv.org/abs/1908.01748).
 
@@ -6,7 +6,7 @@ If you find this useful, or if you use it in your commercial work, please cite:
 
     @inproceedings{2019_SqueezeNAS,
         author = {Albert Shaw and Daniel Hunter and Forrest Iandola and Sammy Sidhu},
-        title = {{SqueezeNAS}: Fast neural architecture search for faster semantic segmentation},
+        title = {{SqueezeNAS}: Fast Neural Architecture Search for Faster Semantic Segmentation},
         booktitle = {ICCV Neural Architects Workshop},
         year = {2019}
     }
