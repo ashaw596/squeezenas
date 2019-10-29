@@ -1,7 +1,7 @@
-from torch import nn
-from tabulate import tabulate
-import torch
 import numpy as np
+import torch
+from tabulate import tabulate
+from torch import nn
 
 
 class MAC_Counter:
@@ -34,7 +34,7 @@ class MAC_Counter:
             if layer['attributes']['name'] == 'Conv2d':
                 kernel = layer['attributes']['kernel']
                 layer['gmacs'] = (np.prod(layer['out_shape']) * np.prod(layer['attributes']['kernel'])
-                                   * layer['in_shape'][1] / (10**9 * layer['attributes']['groups']))
+                                  * layer['in_shape'][1] / (10 ** 9 * layer['attributes']['groups']))
                 self.total_gmacs += layer['gmacs']
 
             layer['in_shape'] = 'x'.join(map(str, layer['in_shape']))
@@ -51,7 +51,7 @@ class HookBackend:
     def __call__(self, model, input_shape):
         def hook(module, input, output):
             if list(module.children()) != []:
-                return # ignore modules with children, e.g. nn.Sequential
+                return  # ignore modules with children, e.g. nn.Sequential
             assert len(input) == 1
             input = input[0]
             attributes = self.get_attributes(module)
@@ -68,7 +68,7 @@ class HookBackend:
         handles = []
         model.apply(register_hook)
 
-        data = torch.rand(*input_shape).to(next(model.parameters()).device) # get data on same device as model
+        data = torch.rand(*input_shape).to(next(model.parameters()).device)  # get data on same device as model
 
         with torch.no_grad():
             model(data)

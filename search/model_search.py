@@ -1,56 +1,48 @@
-from dataclasses import dataclass
-from typing import Sequence, Optional
+from typing import Sequence
 
 from torch import nn
 
+from arch.model import InverseResidualMetaNetHyperparameters
 from arch.operations import Ops
-from arch.utils import Flatten, conv3x3_bn, conv_1x1_bn
+from arch.utils import conv3x3_bn, conv_1x1_bn, Flatten
+from search.arch_search import MixedModule, SuperNetwork
+
+SQUEEZENAS_SEARCH_SPACE = (Ops.mobile_net_k3_e1_g1,
+                           Ops.mobile_net_k3_e1_g2,
+                           Ops.mobile_net_k3_e3_g1,
+                           Ops.mobile_net_k3_e6_g1,
+                           Ops.mobile_net_k5_e1_g1,
+                           Ops.mobile_net_k5_e1_g2,
+                           Ops.mobile_net_k5_e3_g1,
+                           Ops.mobile_net_k5_e6_g1,
+                           Ops.mobile_net_k3_e1_g1_d2,
+                           Ops.mobile_net_k3_e1_g2_d2,
+                           Ops.mobile_net_k3_e3_g1_d2,
+                           Ops.mobile_net_k3_e6_g1_d2,
+                           Ops.mobile_net_residual_skipish,)
 
 
-@dataclass(frozen=True)
-class InvertResidualNetBlockMetaHyperparameters:
-    num_channels: int
-    num_repeat: int
-    stride: int
-
-
-@dataclass(frozen=True)
-class InverseResidualMetaNetHyperparameters:
-    init_channels: int
-    blocks: Sequence[InvertResidualNetBlockMetaHyperparameters]
-    last_channels: Optional[int]
-    num_classes: Optional[int]
-    last_pooled_channels: Optional[int] = None
-
-    def __post_init__(self):
-        if self.last_channels is None:
-            assert self.num_classes is None
-
-
-class InvertedResidual(nn.Module):
-    def __init__(self, op_type: Ops, c_in: int, c_out: int, stride: int):
-        super(InvertedResidual, self).__init__()
+class MixedInvertedResidual(MixedModule):
+    def __init__(self, c_in: int, c_out: int, stride: int, ops: Sequence[Ops]):
         self.stride = stride
         assert stride in [1, 2]
         self.use_res_connect = self.stride == 1 and c_in == c_out
-        self.op: nn.Module = op_type.value.__call__(c_in, c_out, stride, affine=True)
-        self.op_type = op_type
+        super().__init__([(op.name, op.value(c_in, c_out, stride, affine=True)) for op in ops])
 
     def forward(self, x):
-        output = self.op(x)
+        output, cost = super().forward(x)
         if self.use_res_connect:
-            return x + output
+            return x + output, cost
         else:
-            return output
+            return output, cost
 
 
-class SqueezeNASNet(nn.Module):
-    def __init__(self, hyperparams: InverseResidualMetaNetHyperparameters, genotype: Sequence[Ops], dropout=0):
+class SuperNetworkSqueezeNASNet(SuperNetwork):
+    def __init__(self, hyperparams: InverseResidualMetaNetHyperparameters, dropout=0, ops=SQUEEZENAS_SEARCH_SPACE):
         super().__init__()
         self.hyperparams = hyperparams
         self.conv1 = conv3x3_bn(c_in=3, c_out=hyperparams.init_channels, stride=2)
-        self.residuals: nn.ModuleList[InvertedResidual] = nn.ModuleList()
-        self.genotype = genotype
+        self.residuals: nn.ModuleList[MixedInvertedResidual] = nn.ModuleList()
 
         gene_i = 0
         last_c = hyperparams.init_channels
@@ -61,11 +53,9 @@ class SqueezeNASNet(nn.Module):
                     stride = block_hyper.stride
                 else:
                     stride = 1
-                self.residuals.append(InvertedResidual(genotype[gene_i], last_c, block_hyper.num_channels, stride))
+                self.residuals.append(MixedInvertedResidual(last_c, block_hyper.num_channels, stride, ops))
                 gene_i += 1
                 last_c = block_hyper.num_channels
-
-        assert gene_i == len(genotype)
 
         if hyperparams.last_channels is not None:
             self.last_conv = conv_1x1_bn(last_c, hyperparams.last_channels)
@@ -89,25 +79,27 @@ class SqueezeNASNet(nn.Module):
                 self.criterion = nn.CrossEntropyLoss()
 
     def forward(self, inputs, gt=None):
+        total_cost = 0
         cur_feat = inputs
         cur_feat = self.conv1(cur_feat)
         residuals_outputs = []
         for i, residual in enumerate(self.residuals):
-            cur_feat = residual(cur_feat)
+            cur_feat, cost = residual(cur_feat)
             residuals_outputs.append(cur_feat)
+            total_cost += cost
 
         if self.hyperparams.last_channels is None:
-            return {'output': cur_feat, 'residuals_outputs': residuals_outputs}
+            return {'output': cur_feat, 'residuals_outputs': residuals_outputs, 'cost': total_cost}
 
         cur_feat = self.last_conv(cur_feat)
 
         if self.hyperparams.num_classes is None:
-            return {'output': cur_feat, 'residuals_outputs': residuals_outputs}
+            return {'output': cur_feat, 'residuals_outputs': residuals_outputs, 'cost': total_cost}
 
         logits = self.classifier(cur_feat)
 
         if gt is None:
-            return {'preds': logits}
+            return {'preds': logits, 'cost': total_cost}
         else:
             loss = self.criterion(logits.float(), gt)
-            return {'loss': loss, 'preds': logits}
+            return {'loss': loss, 'preds': logits, 'cost': total_cost}

@@ -1,18 +1,8 @@
 import abc
 import enum
-from types import DynamicClassAttribute
 
 import torch
 import torch.nn as nn
-
-
-class EnumNamePickled(enum.Enum):
-    @staticmethod
-    def get_by_name(__class__, name):
-        return __class__[name]
-
-    def __reduce_ex__(self, proto):
-        return EnumNamePickled.get_by_name, (self.__class__, self.name,)
 
 
 class Operation(abc.ABC):
@@ -62,7 +52,7 @@ class InvertedResidualSkipOperation(Operation):
             return self.identity(c_in, c_out, stride, affine)
 
 
-class Ops(EnumNamePickled):
+class Ops(enum.Enum):
     inverse_residual_k3_e1_g1 = InvertedResidualOperation(group=1, kernel_size=3, padding=1, expand_ratio=1)
     inverse_residual_k3_e1_g2 = InvertedResidualOperation(group=2, kernel_size=3, padding=1, expand_ratio=1)
     inverse_residual_k3_e3_g1 = InvertedResidualOperation(group=1, kernel_size=3, padding=1, expand_ratio=3)
@@ -84,9 +74,9 @@ class Ops(EnumNamePickled):
 
     residual_skipish = InvertedResidualSkipOperation()
 
-    @DynamicClassAttribute
-    def value(self) -> Operation:
-        return super().value
+    # @DynamicClassAttribute
+    # def value(self) -> Operation:
+    #     return super().value
 
     def __repr__(self):
         return super().__str__()

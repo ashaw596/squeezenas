@@ -43,7 +43,6 @@ def map_back_to_35(gt):
 
 def main(verbose: bool, only_macs: bool, save_output: bool = True, net_name: str = "squeezenas_mac_small",
          use_cpu: bool = True):
-
     result_dir = Path(RESULTS_DIR) / net_name
     result_dir.mkdir(parents=True, exist_ok=True)
 
@@ -88,13 +87,12 @@ def main(verbose: bool, only_macs: bool, save_output: bool = True, net_name: str
         pred = pred.cpu().data.numpy()
         pred = map_back_to_35(pred).astype(np.uint8)
         assert pred.shape == (1024, 2048), pred.shape
-        preds_PIL = Image.fromarray(pred, mode='L')
-        preds_PIL.save(preds_dir / fname.name, format='PNG')
+        preds_pil = Image.fromarray(pred, mode='L')
+        preds_pil.save(preds_dir / fname.name, format='PNG')
 
     print('\n' + '-' * 54)
     sys.argv = [sys.argv[0]]
     metrics()  # run evaluation using Cityscapes metrics
-
 
     export_dir = result_dir / 'evaluationResults'
 
@@ -128,7 +126,6 @@ if __name__ == '__main__':
                              ' Otherwise the gpu will be used to run evaluation.')
 
     parser.add_argument('--net', type=str, choices=sorted(SQUEEZENAS_NETWORKS.keys()), default="squeezenas_lat_small")
-
 
     args, unknown = parser.parse_known_args()
     print(args)
